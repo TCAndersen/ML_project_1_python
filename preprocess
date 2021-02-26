@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+
+"""
+Factoring Student Performance Variables
+
+Created on Tue Feb 23 11:11:25 2021
+@author: TCA
+"""
+#imports
+import numpy as np
+import pandas as pd
+
+#file path
+file_path = '../Data Sets/Student Performance/'
+
+#read csv file and get values
+df = pd.read_csv(file_path + 'student-por.csv', sep=";")
+
+#factorise/categorise studytime, travel time, Medu, Fedu
+labels = ['<2_h', '2-5_h', '5-10_h', '>10_h']
+df['studytime'] = pd.cut(df.studytime, range(1, 6), right=False, labels=labels, ordered=False)
+
+labels = ['<15_min', '15-30_min', '30-60_min', '>60_min']
+df['traveltime'] = pd.cut(df.traveltime, range(1, 6), right=False, labels=labels, ordered=False)
+
+labels = ['none', '1st-4th_grade', '5th-9th_grade', '10th-12th_grade', 'higher']
+df['Medu'] = pd.cut(df.Medu, range(6), right=False, labels=labels, ordered=False)
+
+labels = ['none', '1st-4th_grade', '5th-9th_grade', '10th-12th_grade', 'higher']
+df['Fedu'] = pd.cut(df.Fedu, range(6), right=False, labels=labels, ordered=False)
+
+#extract the attribute names that came from the header of the csv
+cols = range(0, 33) 
+attributeNames = np.asarray(df.columns[cols])
+
+#One-Hot encoding loop
+for attribute in reversed(attributeNames):
+    #if attribute type is not integer
+    if df[attribute].dtype != "int64":
+        #encode, join, and remove original
+        one_hot = pd.get_dummies(df[attribute], prefix=attribute)
+        df = pd.concat([one_hot, df], axis=1)
+        df = df.drop(columns=[attribute])
+
+#convert to Numpy
+raw_data = df.values
